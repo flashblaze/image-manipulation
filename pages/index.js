@@ -4,6 +4,7 @@ import { UploadOutlined } from '@ant-design/icons';
 import fetch from 'isomorphic-unfetch';
 
 import HeadContent from '../components/Head';
+import Footer from '../components/Footer/Footer';
 import './styles.css';
 
 const Index = () => {
@@ -76,7 +77,7 @@ const Index = () => {
   };
 
   return (
-    <div>
+    <div className="container">
       <HeadContent />
       <Card title="Image manipulator">
         <Form
@@ -126,6 +127,7 @@ const Index = () => {
           ) : null}
         </Form>
       </Card>
+      <Footer />
     </div>
   );
 };
