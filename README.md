@@ -10,5 +10,6 @@ A simple image manipulation website created in React and Node
 ### Backend
 - Express
 - Sharp
+- Imgur API
 
 Will be updated with more info later
