@@ -12,7 +12,7 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 
 const manipulate = fileInfo => {
-  const { file, xPixels, yPixels } = fileInfo;
+  const { file, xPixels, yPixels, imageFormat } = fileInfo;
   // file structure
 
   // file = {
@@ -26,6 +26,7 @@ const manipulate = fileInfo => {
 
   return sharp(file.buffer)
     .resize(parseInt(xPixels), parseInt(yPixels))
+    .toFormat(imageFormat)
     .toBuffer()
     .then(data => {
       // imgur requires base64 data
@@ -65,14 +66,16 @@ app.prepare().then(() => {
       if (!req.body) {
         res.sendStatus(500);
       } else {
-        const { xPixels, yPixels } = req.body;
-        manipulate({ file: req.file, xPixels, yPixels }).then(uploadInfo => {
-          if (uploadInfo.data !== null) {
-            return res.status(200).json({ uploadInfo: uploadInfo.data });
-          } else {
-            res.status(404);
+        const { xPixels, yPixels, imageFormat } = req.body;
+        manipulate({ file: req.file, xPixels, yPixels, imageFormat }).then(
+          uploadInfo => {
+            if (uploadInfo.data !== null) {
+              return res.status(200).json({ uploadInfo: uploadInfo.data });
+            } else {
+              res.status(404);
+            }
           }
-        });
+        );
       }
     }
   });
