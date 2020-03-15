@@ -7,7 +7,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "cross-env NODE_ENV=production node server.js",
-    "prettier-all": "prettier --write \"./**/*.{js,jsx,json}\""
+    "prettier-all": "prettier --write \"./**/*.{js,jsx,json}\"",
+    "test": "jest --watch",
+    "test:ci": "jest --ci"
   },
   "dependencies": {
     "@ant-design/icons": "^4.0.2",
@@ -27,7 +29,12 @@
     "sharp": "^0.25.1"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^5.1.1",
+    "@testing-library/react": "^10.0.1",
+    "babel-jest": "^25.1.0",
+    "jest": "^25.1.0",
     "nodemon": "^2.0.2",
-    "prettier": "^1.19.1"
+    "prettier": "^1.19.1",
+    "react-test-renderer": "^16.13.0"
   }
 }
