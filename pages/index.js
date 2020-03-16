@@ -10,8 +10,8 @@ import './styles.css';
 const Index = () => {
   const [fileList, setFileList] = useState([]);
   const [uploading, setUploading] = useState(false);
-  const [xPixels, setXPixels] = useState(0);
-  const [yPixels, setYPixels] = useState(0);
+  const [width, setWidth] = useState(0);
+  const [height, setHeight] = useState(0);
   const [uploadLink, setUploadLink] = useState('');
   const [format, setFormat] = useState('');
 
@@ -40,8 +40,8 @@ const Index = () => {
     fileList.forEach(file => {
       formData.append('file', file);
     });
-    formData.append('xPixels', values.xPixels);
-    formData.append('yPixels', values.yPixels);
+    formData.append('width', values.width);
+    formData.append('height', values.height);
     formData.append('imageFormat', values.imageFormat);
 
     setUploading(true);
@@ -93,11 +93,11 @@ const Index = () => {
             </Upload>
           </Form.Item>
 
-          <Form.Item name="xPixels" label="X Pixels">
-            <InputNumber value={xPixels} onChange={e => setXPixels(e)} />
+          <Form.Item name="width" label="Width">
+            <InputNumber value={width} onChange={e => setWidth(e)} />
           </Form.Item>
-          <Form.Item name="yPixels" label="Y Pixels">
-            <InputNumber value={yPixels} onChange={e => setYPixels(e)} />
+          <Form.Item name="height" label="Height">
+            <InputNumber value={height} onChange={e => setHeight(e)} />
           </Form.Item>
 
           <Form.Item name="imageFormat" label="Output format">
@@ -111,6 +111,7 @@ const Index = () => {
 
           <Form.Item>
             <Button
+              className="submitButton"
               type="primary"
               htmlType="submit"
               disabled={fileList.length === 0}

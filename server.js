@@ -12,7 +12,7 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 
 const manipulate = fileInfo => {
-  const { file, xPixels, yPixels, imageFormat } = fileInfo;
+  const { file, width, height, imageFormat } = fileInfo;
   // file structure
 
   // file = {
@@ -25,7 +25,7 @@ const manipulate = fileInfo => {
   // };
 
   return sharp(file.buffer)
-    .resize(parseInt(xPixels), parseInt(yPixels))
+    .resize({ height: parseInt(height), width: parseInt(width) })
     .toFormat(imageFormat)
     .toBuffer()
     .then(data => {
@@ -66,8 +66,8 @@ app.prepare().then(() => {
       if (!req.body) {
         res.sendStatus(500);
       } else {
-        const { xPixels, yPixels, imageFormat } = req.body;
-        manipulate({ file: req.file, xPixels, yPixels, imageFormat }).then(
+        const { width, height, imageFormat } = req.body;
+        manipulate({ file: req.file, width, height, imageFormat }).then(
           uploadInfo => {
             if (uploadInfo.data !== null) {
               return res.status(200).json({ uploadInfo: uploadInfo.data });
