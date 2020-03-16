@@ -1,45 +1,74 @@
 import React, { useState } from 'react';
 import { Button, Card, Form, message, InputNumber, Radio, Upload } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import fetch from 'isomorphic-unfetch';
+import 'antd/dist/antd.css';
 
 import HeadContent from '../components/Head';
 import Footer from '../components/Footer/Footer';
 import './styles.css';
 
 const Index = () => {
-  const [fileList, setFileList] = useState([]);
+  const [singleImage, setSingleImage] = useState('');
   const [uploading, setUploading] = useState(false);
-  const [width, setWidth] = useState(0);
-  const [height, setHeight] = useState(0);
   const [uploadLink, setUploadLink] = useState('');
-  const [format, setFormat] = useState('');
+  const [imgagePreview, setImgagePreview] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const [form] = Form.useForm();
 
-  const submitProps = {
-    onRemove: file => {
-      const index = fileList.indexOf(file);
-      const newFileList = fileList.slice();
-      newFileList.splice(index, 1);
-      return setFileList(newFileList);
-    },
-    accept: '.jpg,.jpeg,.png',
-    multiple: false,
-    beforeUpload: file => {
-      setFileList([...fileList, file]);
-      return false;
-    },
-    fileList,
+  const getBase64 = (img, callback) => {
+    const reader = new FileReader();
+    reader.addEventListener('load', () => callback(reader.result));
+    reader.readAsDataURL(img);
+    setUploadLink('');
+  };
+
+  const handleChange = info => {
+    if (info.file.status === 'uploading') {
+      setLoading(true);
+      return;
+    }
+    if (info.file.status === 'done') {
+      getBase64(info.file.originFileObj, imageUrl => {
+        setImgagePreview(imageUrl);
+        setLoading(false);
+      });
+    }
+  };
+
+  const beforeUpload = file => {
+    const formData = new FormData();
+    formData.append('file', file);
+    setSingleImage(file);
+    fetch('/api/preview', { method: 'POST', body: formData })
+      .then(res => res.json())
+      .then(data => {
+        form.setFieldsValue({
+          width: data.originalWidth,
+          height: data.originalHeight,
+        });
+        if (data.originalFormat === 'jpg' || data.originalFormat === 'jpeg') {
+          form.setFieldsValue({ imageFormat: 'jpg' });
+        } else {
+          form.setFieldsValue({ imageFormat: 'png' });
+        }
+      });
+
+    const isLessThan2M = file.size / 1024 / 1024 < 2;
+    if (!isLessThan2M) {
+      message.error('Image must smaller than 2MB!');
+      setLoading(false);
+      setSingleImage('');
+    }
+    return isLessThan2M;
   };
 
   const submitForm = values => {
     setUploadLink('');
     let formData = new FormData();
 
-    fileList.forEach(file => {
-      formData.append('file', file);
-    });
+    formData.append('file', singleImage);
     formData.append('width', values.width);
     formData.append('height', values.height);
     formData.append('imageFormat', values.imageFormat);
@@ -63,10 +92,12 @@ const Index = () => {
           setUploading(false);
           message.error('Incorrect format');
         } else {
-          setFileList([]);
+          setSingleImage('');
           setUploading(false);
           message.success('Success');
           form.resetFields();
+          setImgagePreview('');
+          setLoading(false);
           return res.json();
         }
       })
@@ -75,6 +106,13 @@ const Index = () => {
       })
       .catch(err => console.error(err));
   };
+
+  const uploadButton = (
+    <div>
+      {loading ? <LoadingOutlined /> : <PlusOutlined />}
+      <div className="ant-upload-text">Upload</div>
+    </div>
+  );
 
   return (
     <div className="container">
@@ -85,25 +123,29 @@ const Index = () => {
           form={form}
           initialValues={{ imageFormat: 'png' }}>
           <Form.Item name="uploadFile">
-            <Upload {...submitProps}>
-              <Button>
-                <UploadOutlined />
-                Upload a file
-              </Button>
+            <Upload
+              accept=".png,.jpeg,.jpg"
+              listType="picture-card"
+              showUploadList={false}
+              beforeUpload={beforeUpload}
+              onChange={e => handleChange(e)}>
+              {imgagePreview ? (
+                <img src={imgagePreview} alt="file" style={{ width: '100%' }} />
+              ) : (
+                uploadButton
+              )}
             </Upload>
           </Form.Item>
 
-          <Form.Item name="width" label="Width">
-            <InputNumber value={width} onChange={e => setWidth(e)} />
+          <Form.Item name="width" label="Width" validateFirst={true}>
+            <InputNumber />
           </Form.Item>
           <Form.Item name="height" label="Height">
-            <InputNumber value={height} onChange={e => setHeight(e)} />
+            <InputNumber />
           </Form.Item>
 
           <Form.Item name="imageFormat" label="Output format">
-            <Radio.Group
-              onChange={e => setFormat(e.target.value)}
-              value={format}>
+            <Radio.Group>
               <Radio value="jpg">jpg</Radio>
               <Radio value="png">png</Radio>
             </Radio.Group>
@@ -114,7 +156,7 @@ const Index = () => {
               className="submitButton"
               type="primary"
               htmlType="submit"
-              disabled={fileList.length === 0}
+              disabled={singleImage === ''}
               loading={uploading}>
               {uploading ? 'Uploading' : 'Submit'}
             </Button>

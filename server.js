@@ -13,16 +13,6 @@ const handle = app.getRequestHandler();
 
 const manipulate = fileInfo => {
   const { file, width, height, imageFormat } = fileInfo;
-  // file structure
-
-  // file = {
-  //   fieldname: 'file',
-  //   originalname: '200302_231249_459.jpg',
-  //   encoding: '7bit',
-  //   mimetype: 'image/jpeg',
-  //   buffer: Buffer,
-  //   size: 52190,
-  // };
 
   return sharp(file.buffer)
     .resize({ height: parseInt(height), width: parseInt(width) })
@@ -57,6 +47,20 @@ app.prepare().then(() => {
 
   // For parsing application/json
   server.use(bodyParser.json());
+
+  server.post('/api/preview', upload.single('file'), (req, res) => {
+    sharp(req.file.buffer)
+      .metadata()
+      .then(info => {
+        res
+          .status(200)
+          .send({
+            originalHeight: info.height,
+            originalWidth: info.width,
+            originalFormat: info.format,
+          });
+      });
+  });
 
   server.post('/api/upload', upload.single('file'), (req, res) => {
     // Process the file only if it of type image
