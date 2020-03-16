@@ -49,16 +49,17 @@ app.prepare().then(() => {
   server.use(bodyParser.json());
 
   server.post('/api/preview', upload.single('file'), (req, res) => {
+    let base64File = req.file.buffer.toString('base64');
+
     sharp(req.file.buffer)
       .metadata()
       .then(info => {
-        res
-          .status(200)
-          .send({
-            originalHeight: info.height,
-            originalWidth: info.width,
-            originalFormat: info.format,
-          });
+        res.status(200).send({
+          originalHeight: info.height,
+          originalWidth: info.width,
+          originalFormat: info.format,
+          base64File,
+        });
       });
   });
 

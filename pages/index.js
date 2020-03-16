@@ -17,26 +17,6 @@ const Index = () => {
 
   const [form] = Form.useForm();
 
-  const getBase64 = (img, callback) => {
-    const reader = new FileReader();
-    reader.addEventListener('load', () => callback(reader.result));
-    reader.readAsDataURL(img);
-    setUploadLink('');
-  };
-
-  const handleChange = info => {
-    if (info.file.status === 'uploading') {
-      setLoading(true);
-      return;
-    }
-    if (info.file.status === 'done') {
-      getBase64(info.file.originFileObj, imageUrl => {
-        setImgagePreview(imageUrl);
-        setLoading(false);
-      });
-    }
-  };
-
   const beforeUpload = file => {
     const formData = new FormData();
     formData.append('file', file);
@@ -48,10 +28,13 @@ const Index = () => {
           width: data.originalWidth,
           height: data.originalHeight,
         });
+
         if (data.originalFormat === 'jpg' || data.originalFormat === 'jpeg') {
+          setImgagePreview('data:image/jpeg;base64,' + data.base64File);
           form.setFieldsValue({ imageFormat: 'jpg' });
         } else {
           form.setFieldsValue({ imageFormat: 'png' });
+          setImgagePreview('data:image/png;base64,' + data.base64File);
         }
       });
 
@@ -127,8 +110,7 @@ const Index = () => {
               accept=".png,.jpeg,.jpg"
               listType="picture-card"
               showUploadList={false}
-              beforeUpload={beforeUpload}
-              onChange={e => handleChange(e)}>
+              beforeUpload={beforeUpload}>
               {imgagePreview ? (
                 <img src={imgagePreview} alt="file" style={{ width: '100%' }} />
               ) : (
