@@ -18,6 +18,7 @@ jobs:
       - run: npm run test:ci
      
   publish-heroku:
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
