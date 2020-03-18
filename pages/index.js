@@ -18,6 +18,7 @@ const Index = () => {
   const [form] = Form.useForm();
 
   const beforeUpload = file => {
+    setLoading(true);
     const formData = new FormData();
     formData.append('file', file);
     setSingleImage(file);
@@ -55,6 +56,7 @@ const Index = () => {
     formData.append('width', values.width);
     formData.append('height', values.height);
     formData.append('imageFormat', values.imageFormat);
+    formData.append('rotationAngle', values.rotationAngle);
 
     setUploading(true);
 
@@ -104,7 +106,7 @@ const Index = () => {
         <Form
           onFinish={submitForm}
           form={form}
-          initialValues={{ imageFormat: 'png' }}>
+          initialValues={{ imageFormat: 'png', rotationAngle: 0 }}>
           <Form.Item name="uploadFile">
             <Upload
               accept=".png,.jpeg,.jpg"
@@ -130,6 +132,15 @@ const Index = () => {
             <Radio.Group>
               <Radio value="jpg">jpg</Radio>
               <Radio value="png">png</Radio>
+            </Radio.Group>
+          </Form.Item>
+
+          <Form.Item name="rotationAngle" label="Rotation">
+            <Radio.Group>
+              <Radio value={0}>Default</Radio>
+              <Radio value={90}>90° Clockwise</Radio>
+              <Radio value={180}>180°</Radio>
+              <Radio value={270}>90° Counterclockwise</Radio>
             </Radio.Group>
           </Form.Item>
 

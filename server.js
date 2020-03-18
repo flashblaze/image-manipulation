@@ -12,10 +12,11 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 
 const manipulate = fileInfo => {
-  const { file, width, height, imageFormat } = fileInfo;
+  const { file, width, height, imageFormat, rotationAngle } = fileInfo;
 
   return sharp(file.buffer)
     .resize({ height: parseInt(height), width: parseInt(width) })
+    .rotate(0 || parseInt(rotationAngle))
     .toFormat(imageFormat)
     .toBuffer()
     .then(data => {
@@ -71,16 +72,20 @@ app.prepare().then(() => {
       if (!req.body) {
         res.sendStatus(500);
       } else {
-        const { width, height, imageFormat } = req.body;
-        manipulate({ file: req.file, width, height, imageFormat }).then(
-          uploadInfo => {
-            if (uploadInfo.data !== null) {
-              return res.status(200).json({ uploadInfo: uploadInfo.data });
-            } else {
-              res.status(404);
-            }
+        const { width, height, imageFormat, rotationAngle } = req.body;
+        manipulate({
+          file: req.file,
+          width,
+          height,
+          imageFormat,
+          rotationAngle,
+        }).then(uploadInfo => {
+          if (uploadInfo.data !== null) {
+            return res.status(200).json({ uploadInfo: uploadInfo.data });
+          } else {
+            res.status(404);
           }
-        );
+        });
       }
     }
   });
